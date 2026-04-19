@@ -126,21 +126,10 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 **Solution:** Used namespace clearing (`Clear Namespace`) during re-ingestion and introduced a clean data lifecycle strategy (full rebuild vs. incremental updates). This eliminated legacy data contamination and stabilized retrieval behavior.
 
----
-
-### 4. Workflow Data Flow in n8n
-
-**Challenge:** In a multi-branch workflow, `$json` structure changes across nodes caused missing session keys in memory, undefined input in the AI Agent, and failed Telegram responses.
-
-**Solution:** Explicitly referenced the original trigger node:
-```
-{{ $('Telegram Trigger').first().json.message.text }}
-```
-Avoided reliance on intermediate `$json` structures, which improved workflow reliability and eliminated context propagation errors.
 
 ---
 
-### 5. Duplicate Responses
+### 4. Duplicate Responses
 
 **Challenge:** Users occasionally received multiple replies due to multiple items being passed into a single Telegram response node.
 
@@ -148,7 +137,7 @@ Avoided reliance on intermediate `$json` structures, which improved workflow rel
 
 ---
 
-### 6. System Efficiency (FAQ-first Routing)
+### 5. System Efficiency (FAQ-first Routing)
 
 **Challenge:** Running the full RAG pipeline for every query increases latency and API cost unnecessarily.
 
