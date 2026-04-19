@@ -102,6 +102,72 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 ---
 
+## Implementation Challenges & Solutions
+
+### 1. FAQ Chunking & Data Integrity
+
+**Challenge:** Initial ingestion used naive text chunking, splitting FAQ entries into fragments — questions and answers were stored independently, causing retrieval to return questions without answers.
+
+**Solution:** Implemented a custom parsing step using a Code node to transform the FAQ document into atomic Q&A pairs. Removed downstream text splitting for FAQ data to preserve semantic integrity. Each Pinecone record contains both question and answer.
+
+---
+
+### 2. Retrieval Threshold Tuning
+
+**Challenge:** Vector similarity scores for relevant queries were often in the 0.6–0.7 range, while the initial threshold (0.88) was too high, blocking valid FAQ matches.
+
+**Solution:** Analyzed score distribution empirically and adjusted the threshold to ~0.65, allowing flexible tuning based on observed performance. This increased FAQ hit rate without significantly introducing false positives.
+
+---
+
+### 3. Data Consistency in Vector Store
+
+**Challenge:** Old incorrectly processed data remained in the Pinecone namespace, causing inconsistent retrieval results even after fixing ingestion logic.
+
+**Solution:** Used namespace clearing (`Clear Namespace`) during re-ingestion and introduced a clean data lifecycle strategy (full rebuild vs. incremental updates). This eliminated legacy data contamination and stabilized retrieval behavior.
+
+---
+
+### 4. Workflow Data Flow in n8n
+
+**Challenge:** In a multi-branch workflow, `$json` structure changes across nodes caused missing session keys in memory, undefined input in the AI Agent, and failed Telegram responses.
+
+**Solution:** Explicitly referenced the original trigger node:
+```
+{{ $('Telegram Trigger').first().json.message.text }}
+```
+Avoided reliance on intermediate `$json` structures, which improved workflow reliability and eliminated context propagation errors.
+
+---
+
+### 5. Duplicate Responses
+
+**Challenge:** Users occasionally received multiple replies due to multiple items being passed into a single Telegram response node.
+
+**Solution:** Separated response paths — FAQ queries route to a dedicated response node, and AI Agent queries route to a separate one. This ensured consistent single-response behavior.
+
+---
+
+### 6. System Efficiency (FAQ-first Routing)
+
+**Challenge:** Running the full RAG pipeline for every query increases latency and API cost unnecessarily.
+
+**Solution:** Implemented a FAQ-first routing strategy:
+
+```
+User Query
+   ↓
+FAQ Retrieval (Pinecone)
+   ↓
+High similarity?
+   ├─ YES → Direct FAQ response
+   └─ NO  → Full RAG (AI Agent)
+```
+
+This reduced latency, lowered API cost, and improved overall user experience.
+
+---
+
 ## Evaluation
 
 The agent can be evaluated on three dimensions:
