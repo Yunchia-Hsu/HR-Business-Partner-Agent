@@ -104,11 +104,24 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 ## Implementation Challenges & Solutions
 
-### 1. FAQ Chunking & Data Integrity
+### 1. System Efficiency (FAQ-first Routing)
 
-**Challenge:** Initial ingestion used naive text chunking, splitting FAQ entries into fragments — questions and answers were stored independently, causing retrieval to return questions without answers.
+**Challenge:** Running the full RAG pipeline for every query increases latency and API cost unnecessarily.
 
-**Solution:** Implemented a custom parsing step using a Code node to transform the FAQ document into atomic Q&A pairs. Removed downstream text splitting for FAQ data to preserve semantic integrity. Each Pinecone record contains both question and answer.
+**Solution:** Implemented a FAQ-first routing strategy:
+
+```
+User Query
+   ↓
+FAQ Retrieval (Pinecone)
+   ↓
+High similarity?
+   ├─ YES → Direct FAQ response
+   └─ NO  → Full RAG (AI Agent)
+```
+
+This reduced latency, lowered API cost, and improved overall user experience.
+
 
 ---
 
@@ -137,23 +150,11 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 ---
 
-### 5. System Efficiency (FAQ-first Routing)
+### 5. FAQ Chunking & Data Integrity
 
-**Challenge:** Running the full RAG pipeline for every query increases latency and API cost unnecessarily.
+**Challenge:** Initial ingestion used naive text chunking, splitting FAQ entries into fragments — questions and answers were stored independently, causing retrieval to return questions without answers.
 
-**Solution:** Implemented a FAQ-first routing strategy:
-
-```
-User Query
-   ↓
-FAQ Retrieval (Pinecone)
-   ↓
-High similarity?
-   ├─ YES → Direct FAQ response
-   └─ NO  → Full RAG (AI Agent)
-```
-
-This reduced latency, lowered API cost, and improved overall user experience.
+**Solution:** Implemented a custom parsing step using a Code node to transform the FAQ document into atomic Q&A pairs. Removed downstream text splitting for FAQ data to preserve semantic integrity. Each Pinecone record contains both question and answer.
 
 ---
 
