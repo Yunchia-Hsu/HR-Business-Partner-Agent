@@ -98,7 +98,7 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 - **Authentication** — the prototype does not verify employee identity. Production would require SSO integration.
 - **Real-time HR system data** — leave balances and personalised data are not pulled live. The agent answers based on policy, not personal records.
 - **Multi-language support** — the knowledge base is in English only.
-- **Deployment infrastructure** — no production deployment is included in this prototype.
+- **Deployment infrastructure** — deployed on n8n as a workflow automation agent.
 
 ---
 
@@ -113,7 +113,5 @@ The agent can be evaluated on three dimensions:
 **Escalation rate** — What proportion of questions does the agent escalate to human HR? Too high means the knowledge base is insufficient. Too low means the agent may be overreaching on sensitive topics.
 
 A set of 10 test cases is included in `hr_agent_test_cases.txt`, covering simple fact retrieval, multi-condition queries, cross-document retrieval, coaching questions, boundary conditions, and out-of-scope escalation.
-
-Tool: **Ragas** can be used to automate faithfulness and relevance scoring at scale.
 
 ---

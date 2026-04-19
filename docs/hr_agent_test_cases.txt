@@ -32,18 +32,19 @@ Pass criteria: Must state both figures correctly. Mixing up the two would be a c
 
 TEST 4 — Cross-document retrieval (benefits + leave_policy)
 Question: How far in advance do I need to notify HR about parental leave?
-Expected answer: ICEYE provides a learning budget of 1,500 EUR per year for courses, certifications, and workshops. Employees can also apply for up to 5 days of paid study leave per year for relevant degrees or certifications, with manager and HR approval at least 4 weeks in advance.
-Source: benefits.txt + leave_policy.txt
+Expected answer: At least 8 weeks before your intended start date. You can start leave up to 4 weeks before the expected due date.
+Source: leave_policy.txt
 Pass criteria: Must mention BOTH the learning budget AND the study leave. This tests whether the agent can combine information from multiple sources.
 
 ---
 
 TEST 5 — Coaching question (career)
 Question: I want to ask my manager for a promotion. How should I prepare?
-Expected answer: Make sure you have been performing consistently at the next level for at least 6 months. Prepare concrete examples of your contributions using the STAR method. Come with specific questions such as what skills you need and where your growth opportunities are. Promotions are evaluated during the December review.
+Expected answer: Make sure you have been performing consistently at the next level for at least 6 months. Prepare concrete examples of your contributions using the STAR method. 
+Come with specific questions such as what skills you need and where your growth opportunities are. Promotions are evaluated during the December review.
 Source: career.txt
 Pass criteria: Answer should be actionable, not just describe the process. Should include the 6-month requirement and December timeline.
-
+XX
 ---
 
 TEST 6 — Policy boundary test (leave_policy)
@@ -59,7 +60,7 @@ Question: What is the total value of my sports, lunch, and commuting benefits co
 Expected answer: Sports and culture benefit is 400 EUR per year (approximately 33 EUR per month). Lunch benefit is up to 13 EUR per working day (approximately 260 EUR per month for 20 working days). Commuting benefit is up to 100 EUR per month. Combined, this is approximately 393 EUR per month.
 Source: benefits.txt
 Pass criteria: Agent should attempt a reasonable calculation. If it cannot calculate, it should at least list all three figures correctly.
-
+XX
 ---
 
 TEST 8 — Out-of-scope escalation test (none)
