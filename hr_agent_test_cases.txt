@@ -1,0 +1,100 @@
+ICEYE HR Agent — Quality Evaluation Test Cases
+Last updated: January 2026
+
+Each question includes the expected answer and which document the answer should come from.
+Use these to verify the agent is retrieving correctly and not hallucinating.
+
+---
+
+TEST 1 — Simple fact retrieval (leave_policy)
+Question: How many days of annual leave do I get per year?
+Expected answer: 25 days for full-time employees. Part-time employees receive leave on a pro-rata basis.
+Source: leave_policy.txt
+Pass criteria: Answer must include the number 25. Must not invent additional conditions.
+
+---
+
+TEST 2 — Multi-condition retrieval (leave_policy)
+Question: I have been sick for 4 days in a row. What do I need to do?
+Expected answer: Notify your manager on the first day. Because the absence is longer than 3 consecutive days, you are required to provide a medical certificate. Submit through the HR portal upon return.
+Source: leave_policy.txt
+Pass criteria: Must mention the 3-day threshold AND the medical certificate requirement. Both conditions must appear.
+
+---
+
+TEST 3 — Number comparison (leave_policy)
+Question: What is the difference between primary and secondary caregiver parental leave?
+Expected answer: Primary caregivers receive 6 months of fully paid parental leave. Secondary caregivers receive 4 weeks of fully paid parental leave.
+Source: leave_policy.txt
+Pass criteria: Must state both figures correctly. Mixing up the two would be a clear failure.
+
+---
+
+TEST 4 — Cross-document retrieval (benefits + leave_policy)
+Question: How far in advance do I need to notify HR about parental leave?
+Expected answer: ICEYE provides a learning budget of 1,500 EUR per year for courses, certifications, and workshops. Employees can also apply for up to 5 days of paid study leave per year for relevant degrees or certifications, with manager and HR approval at least 4 weeks in advance.
+Source: benefits.txt + leave_policy.txt
+Pass criteria: Must mention BOTH the learning budget AND the study leave. This tests whether the agent can combine information from multiple sources.
+
+---
+
+TEST 5 — Coaching question (career)
+Question: I want to ask my manager for a promotion. How should I prepare?
+Expected answer: Make sure you have been performing consistently at the next level for at least 6 months. Prepare concrete examples of your contributions using the STAR method. Come with specific questions such as what skills you need and where your growth opportunities are. Promotions are evaluated during the December review.
+Source: career.txt
+Pass criteria: Answer should be actionable, not just describe the process. Should include the 6-month requirement and December timeline.
+
+---
+
+TEST 6 — Policy boundary test (leave_policy)
+Question: My annual leave is expiring soon. Can I carry it all over to next year?
+Expected answer: You can carry over a maximum of 10 days. Any amount beyond that will be forfeited. Carried-over leave must be used by March 31 of the following year.
+Source: leave_policy.txt
+Pass criteria: Must state the 10-day cap clearly. Must not say all leave can be carried over.
+
+---
+
+TEST 7 — Benefits calculation (benefits)
+Question: What is the total value of my sports, lunch, and commuting benefits combined per month?
+Expected answer: Sports and culture benefit is 400 EUR per year (approximately 33 EUR per month). Lunch benefit is up to 13 EUR per working day (approximately 260 EUR per month for 20 working days). Commuting benefit is up to 100 EUR per month. Combined, this is approximately 393 EUR per month.
+Source: benefits.txt
+Pass criteria: Agent should attempt a reasonable calculation. If it cannot calculate, it should at least list all three figures correctly.
+
+---
+
+TEST 8 — Out-of-scope escalation test (none)
+Question: My manager has been treating me unfairly. What should I do?
+Expected answer: The agent should acknowledge the concern and escalate to a human HR Business Partner. It should provide the HR contact: hr@iceye.fi. It should NOT attempt to give legal or disciplinary advice.
+Source: none — this is intentionally outside the knowledge base
+Pass criteria: Agent must not hallucinate a policy. Must suggest contacting HR directly. This tests the system prompt's escalation rule.
+
+---
+
+TEST 9 — FAQ direct match (hr_faq)
+Question: Can I work from abroad?
+Expected answer: Yes, international remote work is allowed for up to 30 days per year, with prior HR approval.
+Source: hr_faq.txt
+Pass criteria: Answer must include the 30-day limit and the requirement for prior HR approval. Response should be fast and direct since this is a direct FAQ match.
+
+---
+
+TEST 10 — Vague coaching question (career)
+Question: I feel stuck in my career. What can I do?
+Expected answer: Consider requesting a career development conversation with your manager — these should happen at least once per quarter. Reflect on your achievements, growth areas, and what support you need. You can also apply to the internal mentoring programme through the HR portal. If you need additional support, contact your HR Business Partner at hr@iceye.fi.
+Source: career.txt
+Pass criteria: Answer should be empathetic and actionable, not just list policies. Should mention at least two concrete steps the employee can take.
+
+---
+
+SCORING GUIDE
+
+Each test is pass/fail based on the criteria above.
+Score 10/10 — agent is ready for demo
+Score 8–9/10 — acceptable, note which questions failed and why
+Score below 8 — review chunking strategy or system prompt before demo
+
+Key failure patterns to watch for:
+- Hallucination: agent invents a number or policy not in the documents
+- Mixing up figures: e.g. saying parental leave is 4 months instead of 6
+- Missing conditions: answering partially but leaving out a key requirement
+- Refusing to escalate: answering Test 8 with made-up disciplinary advice

@@ -1,0 +1,826 @@
+{
+  "name": "HR Business Partner agent (Iceye)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1808,
+        272
+      ],
+      "id": "64602a15-ad5a-45ee-ab81-4b05901bf90f",
+      "name": "Telegram Trigger",
+      "webhookId": "d4088a28-c7ce-4bba-ad23-af4ed649b032",
+      "credentials": {
+        "telegramApi": {
+          "id": "YdRHKP99Vw4bgNJV",
+          "name": "Iceye_HR_assistant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').first().json.message.text }}",
+        "options": {
+          "systemMessage": "You are a helpful HR assistant providing information about any HR related answers according to the  information from vector data base.    I. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "696f5d09-bde4-443b-82d7-027acb31bbeb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "contextWindowLength": "=5"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        112
+      ],
+      "id": "1192c46b-1672-4eda-9214-e24a1b2f45c2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "id": "26043252-27f3-4bea-b297-70615ce484bf",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "limit": 3,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1nR5eH8axxXKEZZdtyPMH4bYHRbJE9bKt",
+            "cachedResultName": "Iceye"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "e858a914-6734-4703-9ef9-d242c20811e0",
+      "name": "Search Iceye Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1360,
+        720
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Qcqk8doueZk35uaC",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "bd091519-6144-413e-8b6e-bdfb3c74e87e",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        928
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Qcqk8doueZk35uaC",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "text",
+        "options": {}
+      },
+      "id": "68c4b9da-e0a8-45f1-ae02-792bb56a81eb",
+      "name": "Extract Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iceye-hr",
+          "mode": "list",
+          "cachedResultName": "iceye-hr"
+        },
+        "options": {
+          "pineconeNamespace": "fr-docs"
+        }
+      },
+      "id": "f25c978f-78d7-4933-a504-b615625c8b13",
+      "name": "Insert To Pinecone",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        1024
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "G6qevJk7R4trA5TF",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b3900e4c-d33e-4270-ac72-a0285c2bdb79",
+      "name": "OpenAI Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -688,
+        576
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "g67sZXKEuzABAqHC",
+          "name": "OpenAI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "eb117d0a-bc14-4955-b0fb-3455c8ef8bb3",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "id": "e3d0a6a7-19a2-4133-9dd4-8091a2181d9d",
+      "name": "Recursive Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1440
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4",
+          "mode": "list",
+          "cachedResultName": "gpt-4"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "1062d9a7-7089-4a7e-975e-6cd2d3826213",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        272
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "g67sZXKEuzABAqHC",
+          "name": "OpenAI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        464
+      ],
+      "id": "b0e6b076-6f7d-4fd7-a019-09e9dd8061a6",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.output }}\n{{ $json['reply text'] }}",
+        "additionalFields": {}
+      },
+      "id": "fd50f773-173a-4d62-ab4a-90d707132c69",
+      "name": "Send Telegram Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1216,
+        304
+      ],
+      "webhookId": "7606c580-f664-425a-babb-4e4afaf893c4",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "YdRHKP99Vw4bgNJV",
+          "name": "Iceye_HR_assistant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iceye-hr",
+          "mode": "list",
+          "cachedResultName": "iceye-hr"
+        },
+        "options": {}
+      },
+      "id": "ef77f646-f468-4844-9050-5257d590fde2",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        416
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "G6qevJk7R4trA5TF",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e14970bf-fdfb-4255-aa7e-dcf4e6d03b02",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "hr_faq.txt",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -928,
+        736
+      ],
+      "id": "e678ac1b-096a-460e-bbf0-299aa9f8dbf8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iceye-hr",
+          "mode": "list",
+          "cachedResultName": "iceye-hr"
+        },
+        "options": {
+          "pineconeNamespace": "hr-faq"
+        }
+      },
+      "id": "7a4ea338-c6a9-4031-8f40-85144535914d",
+      "name": "Insert To Pinecone1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        640
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "G6qevJk7R4trA5TF",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "b70d5038-2013-4a52-b11d-ec5be417a670",
+      "name": "Default Data Loader1",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 300,
+        "chunkOverlap": 20,
+        "options": {}
+      },
+      "id": "9ea7771f-72cf-4788-98f8-b1b13a2ab2ab",
+      "name": "Recursive Text Splitter1",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "iceye-hr",
+          "mode": "list",
+          "cachedResultName": "iceye-hr"
+        },
+        "prompt": "={{ $json.message.text }}",
+        "topK": 1,
+        "options": {
+          "pineconeNamespace": "hr-faq"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1440,
+        272
+      ],
+      "id": "46dbf003-31bb-4d36-bad8-50e03213fef6",
+      "name": "Pinecone Vector Store hr-faq",
+      "credentials": {
+        "pineconeApi": {
+          "id": "G6qevJk7R4trA5TF",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "341c8a24-cd44-452b-b5b4-440cd20b0d30",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 0.65,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -896,
+        272
+      ],
+      "id": "ffb65267-d017-4fe8-b39e-c2a5f9764df0",
+      "name": "If check faq match score"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7858930c-3361-4332-8935-0c568ae49f82",
+              "name": "reply text",
+              "value": "={{\n  'Answer: ' +\n  (($json.document.pageContent.match(/A:\\s*([^\\n]+)/) || [,'No FAQ answer found'])[1]) +\n  '\\n\\nSource: FAQ'\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        48
+      ],
+      "id": "33a1b32b-f229-488d-b2ef-1bb894a1f586",
+      "name": "Format FAQ Reply"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "28a655b6-b369-4092-b440-725f2b82375c",
+      "name": "Download File hr-faq",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        720
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Qcqk8doueZk35uaC",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "text",
+        "options": {}
+      },
+      "id": "8c4e15cf-6bd5-44d1-9e55-2fa0a89d47ec",
+      "name": "Extract Text hr-faq",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst text = input.text || input.extractedText || input.data || input.content || \"\";\n\nconst sections = text.split(/\\n\\s*\\n/);\nconst output = [];\n\nfor (const section of sections) {\n  const qMatch = section.match(/Q:\\s*(.*)/i);\n  const aMatch = section.match(/A:\\s*([\\s\\S]*)/i);\n\n  if (qMatch && aMatch) {\n    const question = qMatch[1].trim();\n    const answer = aMatch[1].trim();\n\n    output.push({\n      json: {\n        question,\n        answer,\n        text: `Q: ${question}\\nA: ${answer}`,\n        source: \"FAQ\"\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        704
+      ],
+      "id": "d744276e-a41e-4b90-9560-f96c39aaa13d",
+      "name": "Split FAQ into QAs"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store hr-faq",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search Iceye Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Iceye Folder": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text": {
+      "main": [
+        [
+          {
+            "node": "Insert To Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert To Pinecone",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Insert To Pinecone1",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store hr-faq",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert To Pinecone",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert To Pinecone1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download File hr-faq",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store hr-faq": {
+      "main": [
+        [
+          {
+            "node": "If check faq match score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If check faq match score": {
+      "main": [
+        [
+          {
+            "node": "Format FAQ Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File hr-faq": {
+      "main": [
+        [
+          {
+            "node": "Extract Text hr-faq",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text hr-faq": {
+      "main": [
+        [
+          {
+            "node": "Split FAQ into QAs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split FAQ into QAs": {
+      "main": [
+        [
+          {
+            "node": "Insert To Pinecone1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format FAQ Reply": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fbef8a93-9eb6-4d4b-8e35-5faac7334d63",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a355794d99e6f94b545a3163e3c2e4e080f2edc625d16d38431acddf6e1b6d1c"
+  },
+  "id": "PEpPHUEpmvgaZ6L6",
+  "tags": []
+}
