@@ -98,7 +98,6 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 - **Authentication** — the prototype does not verify employee identity. Production would require SSO integration.
 - **Real-time HR system data** — leave balances and personalised data are not pulled live. The agent answers based on policy, not personal records.
 - **Multi-language support** — the knowledge base is in English only.
-- **Deployment infrastructure** — deployed on n8n as a workflow automation agent.
 
 ---
 
