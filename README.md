@@ -9,12 +9,17 @@ A conversational AI agent that supports employees with day-to-day HR needs — a
 HR information is distributed across multiple internal sources (Confluence, Google Drive, policy documents, HR systems). This agent retrieves and combines insights from these sources to deliver accurate, context-aware responses via Telegram.
 
 The system uses a **hybrid retrieval approach**:
+
 - **FAQ fast path** — 80% of common questions are answered directly from a pre-indexed FAQ store, without invoking the LLM. This improves response speed, reduces cost, and lowers the risk of hallucination.
 - **Full RAG pipeline** — less common or more complex questions are routed to an AI Agent that retrieves relevant chunks from the full HR document store and generates a grounded response.
 
 ---
 
 ## Architecture
+
+[Interactive Process Diagram](hr_agent_process_diagram.html)
+
+![n8n Workflow Node](n8n_node.png)
 
 ```
 QUERY FLOW (real-time)
@@ -46,15 +51,15 @@ File type?
 
 ## Key Components
 
-| Component | Tool | Purpose |
-|-----------|------|---------|
-| Workflow orchestration | n8n | Connects all components, handles routing logic |
-| Vector database | Pinecone | Stores and retrieves embeddings for FAQ and HR docs |
-| Embeddings | OpenAI text-embedding-3 | Converts text to semantic vectors |
-| LLM | OpenAI GPT-4 | Generates grounded answers from retrieved context |
-| Session memory | n8n Simple Memory | Maintains conversation context within a session |
-| Chat interface | Telegram Bot | Employee-facing interface |
-| Document source | Google Drive | Stores HR policy documents and FAQ file |
+| Component              | Tool                    | Purpose                                             |
+| ---------------------- | ----------------------- | --------------------------------------------------- |
+| Workflow orchestration | n8n                     | Connects all components, handles routing logic      |
+| Vector database        | Pinecone                | Stores and retrieves embeddings for FAQ and HR docs |
+| Embeddings             | OpenAI text-embedding-3 | Converts text to semantic vectors                   |
+| LLM                    | OpenAI GPT-4            | Generates grounded answers from retrieved context   |
+| Session memory         | n8n Simple Memory       | Maintains conversation context within a session     |
+| Chat interface         | Telegram Bot            | Employee-facing interface                           |
+| Document source        | Google Drive            | Stores HR policy documents and FAQ file             |
 
 ---
 
