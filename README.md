@@ -17,7 +17,7 @@ The system uses a **hybrid retrieval approach**:
 
 ## Architecture
 
-[Interactive Process Diagram](hr_agent_process_diagram.html)
+[Interactive Process Diagram](process_diagram.html)
 
 ![n8n Workflow Node](n8n_node.png)
 
