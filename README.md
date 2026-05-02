@@ -6,7 +6,7 @@ A conversational AI agent that supports employees with day-to-day HR needs — a
 
 ## Overview
 
-HR information is distributed across multiple internal sources (Confluence, Google Drive, policy documents, HR systems). This agent retrieves and combines insights from these sources to deliver accurate, context-aware responses via Telegram.
+HR information is distributed across multiple internal sources (Confluence, Google Drive, policy documents, HR systems). This agent retrieves all docs from Google Drive and combines insights from these sources to deliver accurate, context-aware responses via Telegram.
 
 The system uses a **hybrid retrieval approach**:
 
@@ -68,9 +68,9 @@ File type?
 The agent is trained on four HR documents:
 
 - `leave_policy.txt` — Annual leave, sick leave, parental leave, bereavement leave, study leave
-- `benefits.txt` — Healthcare, learning budget, remote work policy, lunch and commuting benefits
+- `benefits google doc` — Healthcare, learning budget, remote work policy, lunch and commuting benefits
 - `career.txt` — Performance review cycle, career levels, promotion process, coaching guidance
-- `hr_faq.txt` — 35 pre-written Q&A pairs covering the most common HR questions
+- `hr_faq google doc` — 35 pre-written Q&A pairs covering the most common HR questions
 
 ---
 
@@ -101,13 +101,13 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 ---
 
-## Implementation Challenges & Solutions
+## Implementation Challenges & Mitigations
 
 ### 1. System Efficiency (FAQ-first Routing)
 
-**Challenge:** Running the full RAG pipeline for every query increases latency and API cost unnecessarily.
+**Challenge:** Not every employee query requires the full agentic RAG pipeline. Running full retrieval and generation for all queries increases latency and cost, and may introduce unnecessary complexity for simple, repetitive HR questions such as holiday policy or basic benefits.
 
-**Solution:** Implemented a FAQ-first routing strategy:
+**Mitigation:** I designed a FAQ-first routing strategy. The system first checks whether the user’s question closely matches a high-confidence FAQ entry. If so, it returns a direct answer immediately. Only queries that fall outside this high-confidence FAQ path are passed to the full RAG pipeline.
 
 ```
 User Query
@@ -119,41 +119,71 @@ High similarity?
    └─ NO  → Full RAG (AI Agent)
 ```
 
-This reduced latency, lowered API cost, and improved overall user experience.
+This reduced latency, lowered API cost, and also lowers the chance of over-generating on simple policy questions.
 
+Prototype scope: FAQ-first routing with similarity-based decision logic.
+Production next step: Add monitoring for FAQ hit rate, fallback rate, and answer quality over time.
 
 ---
 
-### 2. Retrieval Threshold Tuning
+### 2. Confidence Thresholds and Incorrect Answers
 
 **Challenge:** Vector similarity scores for relevant queries were often in the 0.6–0.7 range, while the initial threshold (0.88) was too high, blocking valid FAQ matches.
 
-**Solution:** Analyzed score distribution empirically and adjusted the threshold to ~0.65, allowing flexible tuning based on observed performance. This increased FAQ hit rate without significantly introducing false positives.
+**Mitigation:** Analyzed score distribution empirically and adjusted the threshold to ~0.65, allowing flexible tuning based on observed performance. This increased FAQ hit rate without significantly introducing false positives.
 
 ---
 
-### 3. Data Consistency in Vector Store
+### 3. Stale Policy Content and Version Conflicts
 
-**Challenge:** Old incorrectly processed data remained in the Pinecone namespace, causing inconsistent retrieval results even after fixing ingestion logic.
+**Challenge:** HR information changes over time. If the system retrieves outdated versionsor conflicting documents, it may produce inaccurate guidance.
 
-**Solution:** Used namespace clearing (`Clear Namespace`) during re-ingestion and introduced a clean data lifecycle strategy (full rebuild vs. incremental updates). This eliminated legacy data contamination and stabilized retrieval behavior.
+**Mitigation:** Used namespace clearing (`Clear Namespace`) during re-ingestion and introduced a clean data lifecycle strategy (full rebuild vs. incremental updates). This eliminated legacy data contamination and stabilized retrieval behavior.
 
+Prototype scope: Clean rebuild strategy and controlled namespace resets to ensure index correctness.
+Production next step: Add metadata such as updated_at, source name, and version number, plus file update triggers and conflict-aware ranking.
+---
+
+
+### 4. Privacy and Access Control
+
+**Challenge:** HR systems often contain information with different access levels. Without proper access control, an HR assistant could expose sensitive documents or provide answers based on data the user should not access.
+
+**Mitigation:** For this prototype, I intentionally limited the scope to general HR guidance and shared policy content.
+
+Prototype scope: General policy assistant only; no personal HR records or role-specific confidential content.
+Production next step: Integrate SSO, role-based access control, and audited API calls so answers are filtered based on user identity and permissions.
 
 ---
 
-### 4. Duplicate Responses
+### 5. Sensitive Topics and Human Escalation
 
-**Challenge:** Users occasionally received multiple replies due to multiple items being passed into a single Telegram response node.
+**Challenge:** Some employee questions go beyond policy retrieval and enter areas where AI should not make the final judgment, such as harassment, disciplinary actions, termination-related concerns, discrimination complaints, or mental health situations.
 
-**Solution:** Separated response paths — FAQ queries route to a dedicated response node, and AI Agent queries route to a separate one. This ensured consistent single-response behavior.
+**Mitigation:** For this prototype, I define clear escalation boundaries for the assistant. The agent can only provide general process guidance or coaching support.
+
+Prototype scope: General policy assistant only; no personal HR records or role-specific confidential content.
+Production next step: Integrate SSO, role-based access control, and audited API calls so answers are filtered based on user identity and permissions.
+
+Prototype scope: Rule-based escalation for clearly sensitive categories.
+Production next step: Add topic classification, escalation logging, and response templates that clearly communicate boundaries.
 
 ---
 
-### 5. FAQ Chunking & Data Integrity
+### 6. Observability and Auditability
 
-**Challenge:** Initial ingestion used naive text chunking, splitting FAQ entries into fragments — questions and answers were stored independently, causing retrieval to return questions without answers.
+**Challenge:** With observability, it's possible to understand why a specific answer was produced and whether the system behaved appropriately, which is important for debugging and improving the system. With auditability, it is possible review what the assistant retrieved, answered, or escalated.
 
-**Solution:** Implemented a custom parsing step using a Code node to transform the FAQ document into atomic Q&A pairs. Removed downstream text splitting for FAQ data to preserve semantic integrity. Each Pinecone record contains both question and answer.
+**Mitigation:** Tracing is an important part of a production-ready design. Key events should be logged, including:
+
+- User query
+- FAQ match (or not)
+- Retrieved document IDs and similarity scores
+- Final generated answer
+- Escalation decisions
+
+Prototype scope: Conceptual logging design and evaluation-oriented tracing.
+Production next step: Add structured logs, trace IDs, retrieval traces, and escalation/audit records.
 
 ---
 
