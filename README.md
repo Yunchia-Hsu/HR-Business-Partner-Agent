@@ -142,6 +142,8 @@ Production next step: Add monitoring for FAQ hit rate, fallback rate, and answer
 
 Prototype scope: Clean rebuild strategy and controlled namespace resets to ensure index correctness.
 Production next step: Add metadata such as updated_at, source name, and version number, plus file update triggers and conflict-aware ranking.
+
+
 ---
 
 
@@ -182,7 +184,7 @@ Production next step: Add topic classification, escalation logging, and response
 - Final generated answer
 - Escalation decisions
 
-Prototype scope: Conceptual logging design and evaluation-oriented tracing.
+Prototype scope: Conceptual logging design and evaluation-oriented tracing. 
 Production next step: Add structured logs, trace IDs, retrieval traces, and escalation/audit records.
 
 ---
