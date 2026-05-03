@@ -95,8 +95,11 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 
 ## What Is Out of Scope
 
-- **Authentication** — the prototype does not verify employee identity. Production would require SSO integration.
-- **Real-time HR system data** — leave balances and personalised data are not pulled live. The agent answers based on policy, not personal records.
+- **Personalized employee data** — the agent does not access leave balances, salary data, or personal HR records.
+- **Authentication and authorization** — the prototype does not include SSO or role-based access control.
+- **Sensitive HR case decisions** — the agent does not make final judgments on harassment, discrimination, disciplinary action, or termination-related issues.
+- **Live HR system integrations** — the prototype does not connect to HRIS or workflow systems.
+- **Production-grade logging and compliance** — observability and auditability are considered, but not fully implemented.
 - **Multi-language support** — the knowledge base is in English only.
 
 ---
