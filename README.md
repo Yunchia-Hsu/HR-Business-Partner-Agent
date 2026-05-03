@@ -6,7 +6,7 @@ A conversational AI agent that supports employees with day-to-day HR needs — a
 
 ## Overview
 
-HR information is distributed across multiple internal sources (Confluence, Google Drive, policy documents, HR systems). This agent retrieves all docs from Google Drive and combines insights from these sources to deliver accurate, context-aware responses via Telegram.
+HR information is distributed across multiple internal sources (Confluence, Google Drive, policy documents, HR systems). This agent retrieves all docs from Google Drive and combines insights from these sources to deliver accurate, context-aware responses via Chatbot.
 
 The system uses a **hybrid retrieval approach**:
 
@@ -24,17 +24,17 @@ The system uses a **hybrid retrieval approach**:
 ```
 QUERY FLOW (real-time)
 
-Telegram message
+Chatbot message
        ↓
 Pinecone vector search (namespace: hr-faq)
        ↓
 Score ≥ 0.65?
-  ├── YES → Format FAQ reply → Send Telegram reply
+  ├── YES → Format FAQ reply → Send Chatbot reply
   └── NO  → AI Agent (Simple Memory + Pinecone hr-docs + OpenAI GPT-4)
                   ↓
              Answer questions with RAG
                   ↓
-             Send Telegram reply
+             Send Chatbot reply
 
 INDEXING FLOW (offline / triggered on file update)
 
@@ -68,9 +68,9 @@ File type?
 The agent is trained on four HR documents:
 
 - `leave_policy.txt` — Annual leave, sick leave, parental leave, bereavement leave, study leave
-- `benefits google doc` — Healthcare, learning budget, remote work policy, lunch and commuting benefits
+- `benefits.txt` — Healthcare, learning budget, remote work policy, lunch and commuting benefits
 - `career.txt` — Performance review cycle, career levels, promotion process, coaching guidance
-- `hr_faq google doc` — 35 pre-written Q&A pairs covering the most common HR questions
+- `hr_faq.txt` — 31 pre-written Q&A pairs covering the most common HR questions
 
 ---
 
@@ -99,7 +99,7 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 - **Authentication and authorization** — the prototype does not include SSO or role-based access control.
 - **Sensitive HR case decisions** — the agent does not make final judgments on harassment, discrimination, disciplinary action, or termination-related issues.
 - **Live HR system integrations** — the prototype does not connect to Human Resources Information System (HRIS) or workflow systems.
-- **Production-grade logging and compliance** — observability and auditability are considered, but not fully implemented.
+- **Production-grade logging** — observability and auditability are considered, but not fully implemented.
 - **Multi-language support** — the knowledge base is in English only.
 
 ---
