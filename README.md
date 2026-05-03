@@ -122,6 +122,7 @@ High similarity?
 This reduced latency, lowered API cost, and also lowers the chance of over-generating on simple policy questions.
 
 Prototype scope: FAQ-first routing with similarity-based decision logic.
+
 Production next step: Add monitoring for FAQ hit rate, fallback rate, and answer quality over time.
 
 ---
@@ -141,8 +142,8 @@ Production next step: Add monitoring for FAQ hit rate, fallback rate, and answer
 **Mitigation:** Used namespace clearing (`Clear Namespace`) during re-ingestion and introduced a clean data lifecycle strategy (full rebuild vs. incremental updates). This eliminated legacy data contamination and stabilized retrieval behavior.
 
 Prototype scope: Clean rebuild strategy and controlled namespace resets to ensure index correctness.
-Production next step: Add metadata such as updated_at, source name, and version number, plus file update triggers and conflict-aware ranking.
 
+Production next step: Add metadata such as updated_at, source name, and version number, plus file update triggers and conflict-aware ranking.
 
 ---
 
@@ -154,6 +155,7 @@ Production next step: Add metadata such as updated_at, source name, and version 
 **Mitigation:** For this prototype, I intentionally limited the scope to general HR guidance and shared policy content.
 
 Prototype scope: General policy assistant only; no personal HR records or role-specific confidential content.
+
 Production next step: Integrate SSO, role-based access control, and audited API calls so answers are filtered based on user identity and permissions.
 
 ---
@@ -164,10 +166,9 @@ Production next step: Integrate SSO, role-based access control, and audited API 
 
 **Mitigation:** For this prototype, I define clear escalation boundaries for the assistant. The agent can only provide general process guidance or coaching support.
 
-Prototype scope: General policy assistant only; no personal HR records or role-specific confidential content.
-Production next step: Integrate SSO, role-based access control, and audited API calls so answers are filtered based on user identity and permissions.
 
 Prototype scope: Rule-based escalation for clearly sensitive categories.
+
 Production next step: Add topic classification, escalation logging, and response templates that clearly communicate boundaries.
 
 ---
@@ -185,6 +186,7 @@ Production next step: Add topic classification, escalation logging, and response
 - Escalation decisions
 
 Prototype scope: Conceptual logging design and evaluation-oriented tracing. 
+
 Production next step: Add structured logs, trace IDs, retrieval traces, and escalation/audit records.
 
 ---
