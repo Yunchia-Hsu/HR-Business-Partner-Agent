@@ -98,7 +98,7 @@ The system prompt instructs the agent to escalate to a human HR Business Partner
 - **Personalized employee data** — the agent does not access leave balances, salary data, or personal HR records.
 - **Authentication and authorization** — the prototype does not include SSO or role-based access control.
 - **Sensitive HR case decisions** — the agent does not make final judgments on harassment, discrimination, disciplinary action, or termination-related issues.
-- **Live HR system integrations** — the prototype does not connect to HRIS or workflow systems.
+- **Live HR system integrations** — the prototype does not connect to Human Resources Information System (HRIS) or workflow systems.
 - **Production-grade logging and compliance** — observability and auditability are considered, but not fully implemented.
 - **Multi-language support** — the knowledge base is in English only.
 
